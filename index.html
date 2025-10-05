@@ -63,15 +63,14 @@
     text-decoration: none;
     color: #333;
     font-weight: bold;
-    flex:1; /* タイトルが伸びてもOK */
   }
   .movie .status-label {
-    width: 60px;      /* 固定幅 */
+    width: 60px;
     text-align: right; 
     font-size: 0.9em;
     color: #555;
     margin-left: 12px;
-    flex-shrink:0;    /* 縮まない */
+    flex-shrink:0;
   }
   .movie button {
     cursor: pointer;
@@ -86,6 +85,13 @@
     background: #1e90ff;
     color: #fff;
     border-color:#1e90ff;
+  }
+
+  .movie img {
+    width: 60px;
+    height: auto;
+    border-radius: 4px;
+    flex-shrink: 0;
   }
 
   /* ランダムピックアップ */
@@ -226,6 +232,8 @@
     <input type="text" id="status" placeholder="有料/無料など" />
     <label>ジャンル</label>
     <input type="text" id="genre" />
+    <label>ポスター画像URL</label>
+    <input type="text" id="poster" placeholder="https://example.com/poster.jpg" />
     <button type="submit">追加</button>
   </form>
   <div id="addMsg" class="status"></div>
@@ -281,9 +289,14 @@ async function loadWant(){
     grouped[g].forEach(m=>{
       const d=document.createElement('div');
       d.className='movie';
-      d.innerHTML=`<a href="${m.url||'#'}" target="_blank">${m.title}</a>
-                   <div class="status-label">${m.status||''}</div>
-                   <button>観た！</button>`;
+      d.innerHTML=`
+        <div style="display:flex;align-items:center;gap:10px;flex:1;">
+          ${m.poster ? `<img src="${m.poster}" alt="${m.title}">` : ''}
+          <a href="${m.url||'#'}" target="_blank">${m.title}</a>
+        </div>
+        <div class="status-label">${m.status||''}</div>
+        <button>観た！</button>
+      `;
       d.querySelector('button').onclick=async()=>{
         await getJSON(API+`?action=watched&title=${encodeURIComponent(m.title)}`);
         loadWant(); loadWatched();
@@ -334,7 +347,8 @@ document.getElementById('addForm').onsubmit=async(e)=>{
   const url=document.getElementById('url').value;
   const status=document.getElementById('status').value;
   const genre=document.getElementById('genre').value;
-  await getJSON(API+`?action=add&title=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}&status=${encodeURIComponent(status)}&genre=${encodeURIComponent(genre)}`);
+  const poster=document.getElementById('poster').value;
+  await getJSON(API+`?action=add&title=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}&status=${encodeURIComponent(status)}&genre=${encodeURIComponent(genre)}&poster=${encodeURIComponent(poster)}`);
   setStatus("✅ 追加されました！");
   document.getElementById('addForm').reset();
   loadWant();

@@ -8,7 +8,7 @@
   body {
     font-family: 'Kosugi Maru', sans-serif;
     margin: 18px;
-    max-width: 900px;
+    max-width: 960px;
     background: #ffffff;
     color: #333;
   }
@@ -49,40 +49,55 @@
 
   .cards-container {
     display: flex;
-    flex-wrap: wrap; /* 横並び→折り返し */
+    flex-wrap: wrap;
     gap: 12px;
-    justify-content: flex-start;
   }
 
   .movie {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 180px;           /* カード幅固定 */
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.08);
     padding: 12px;
+    width: 180px;
+    text-align: center;
   }
-  .movie img {
+
+  .movie img, .movie .no-image {
     width: 100%;
-    height: auto;
+    height: 180px;
     border-radius: 8px;
+    object-fit: cover;
     margin-bottom: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9em;
+    color: #666;
   }
+
+  .movie .no-image span {
+    font-size: 2em;
+    margin-bottom: 4px;
+  }
+
   .movie a {
     font-weight: bold;
     color: #333;
     text-decoration: none;
-    text-align: center;
     margin-bottom: 6px;
     display: block;
   }
+
   .movie .status-label {
     font-size: 0.9em;
     color: #555;
     margin-bottom: 6px;
   }
+
   .movie button {
     cursor: pointer;
     background:#1e90ff;
@@ -173,7 +188,6 @@
     cursor: pointer;
   }
   #addForm button:hover { background: #187bcd; }
-
 </style>
 </head>
 <body>
@@ -273,7 +287,6 @@ async function loadWant(){
 
   const container=document.getElementById('wantList');
   container.innerHTML='';
-
   const colors=["#d6f0ff","#d6f5ff","#d6ffd8","#fff3d6","#e0f5ff","#e0f0ff"];
   let colorIndex=0;
 
@@ -291,7 +304,8 @@ async function loadWant(){
       const d=document.createElement('div');
       d.className='movie';
       d.innerHTML=`
-        ${m.poster ? `<img src="${m.poster}" alt="${m.title}" onerror="this.style.display='none'">` : ''}
+        ${m.poster ? `<img src="${m.poster}" alt="${m.title}" onerror="this.style.display='none'">` 
+                   : `<div class="no-image"><span>🎞️</span>Not image</div>`}
         <a href="${m.url||'#'}" target="_blank">${m.title}</a>
         <div class="status-label">${m.status||''}</div>
         <button>観た！</button>
@@ -323,6 +337,7 @@ async function loadWatched(){
   });
 }
 
+// ランダムピックアップ
 document.getElementById('btnRandom').onclick = () => {
   if(!allMovies.length){ document.getElementById('randomResult').innerText="リストが空です"; return; }
 
@@ -339,6 +354,7 @@ document.getElementById('btnRandom').onclick = () => {
   document.getElementById('randomResult').innerHTML = `👉 <a href="${choice.url||'#'}" target="_blank">${choice.title}</a> [${choice.status||''}]`;
 };
 
+// 追加フォーム
 document.getElementById('addForm').onsubmit=async(e)=>{
   e.preventDefault();
   if(!API){ setStatus("API未設定"); return; }
@@ -352,6 +368,7 @@ document.getElementById('addForm').onsubmit=async(e)=>{
   loadWant();
 };
 
+// 設定
 document.getElementById('saveApi').onclick=()=>{
   const val=document.getElementById('apiUrlInput').value.trim();
   if(val){
@@ -362,6 +379,7 @@ document.getElementById('saveApi').onclick=()=>{
   }
 };
 
+// タブ切替
 document.querySelectorAll('.tab').forEach(tab=>{
   tab.addEventListener('click',()=>{
     document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
@@ -372,6 +390,7 @@ document.querySelectorAll('.tab').forEach(tab=>{
   });
 });
 
+// 初期ロード
 document.getElementById('apiUrlInput').value=API;
 if(API){ loadWant(); loadWatched(); }
 </script>

@@ -46,16 +46,23 @@
     padding: 12px;
     border-radius: 12px;
   }
+
+  .cards-container {
+    display: flex;
+    flex-wrap: wrap; /* 横並び→折り返し */
+    gap: 12px;
+    justify-content: flex-start;
+  }
+
   .movie {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 180px;           /* カード幅固定 */
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.08);
     padding: 12px;
-    margin-bottom: 12px;
-    width: 180px;
   }
   .movie img {
     width: 100%;
@@ -167,12 +174,6 @@
   }
   #addForm button:hover { background: #187bcd; }
 
-  /* カードコンテナ */
-  .cards-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
 </style>
 </head>
 <body>
@@ -208,7 +209,7 @@
     <div id="randomResult" style="margin-top:12px;"></div>
   </div>
 
-  <div id="wantList" class="cards-container">読み込み中...</div>
+  <div id="wantList">読み込み中...</div>
 </div>
 
 <div id="watched" class="tabContent">
@@ -272,6 +273,7 @@ async function loadWant(){
 
   const container=document.getElementById('wantList');
   container.innerHTML='';
+
   const colors=["#d6f0ff","#d6f5ff","#d6ffd8","#fff3d6","#e0f5ff","#e0f0ff"];
   let colorIndex=0;
 
@@ -321,7 +323,6 @@ async function loadWatched(){
   });
 }
 
-// ランダムピックアップ
 document.getElementById('btnRandom').onclick = () => {
   if(!allMovies.length){ document.getElementById('randomResult').innerText="リストが空です"; return; }
 
@@ -338,7 +339,6 @@ document.getElementById('btnRandom').onclick = () => {
   document.getElementById('randomResult').innerHTML = `👉 <a href="${choice.url||'#'}" target="_blank">${choice.title}</a> [${choice.status||''}]`;
 };
 
-// 追加フォーム
 document.getElementById('addForm').onsubmit=async(e)=>{
   e.preventDefault();
   if(!API){ setStatus("API未設定"); return; }
@@ -352,7 +352,6 @@ document.getElementById('addForm').onsubmit=async(e)=>{
   loadWant();
 };
 
-// 設定
 document.getElementById('saveApi').onclick=()=>{
   const val=document.getElementById('apiUrlInput').value.trim();
   if(val){
@@ -363,7 +362,6 @@ document.getElementById('saveApi').onclick=()=>{
   }
 };
 
-// タブ切替
 document.querySelectorAll('.tab').forEach(tab=>{
   tab.addEventListener('click',()=>{
     document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
@@ -374,7 +372,6 @@ document.querySelectorAll('.tab').forEach(tab=>{
   });
 });
 
-// 初期ロード
 document.getElementById('apiUrlInput').value=API;
 if(API){ loadWant(); loadWatched(); }
 </script>

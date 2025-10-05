@@ -8,7 +8,7 @@
   body {
     font-family: 'Kosugi Maru', sans-serif;
     margin: 18px;
-    max-width: 960px;
+    max-width: 1000px;
     background: #ffffff;
     color: #333;
   }
@@ -46,13 +46,11 @@
     padding: 12px;
     border-radius: 12px;
   }
-
   .cards-container {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
   }
-
   .movie {
     display: flex;
     flex-direction: column;
@@ -61,43 +59,42 @@
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.08);
     padding: 12px;
-    width: 180px;
-    text-align: center;
+    width: 140px;
   }
-
-  .movie img, .movie .no-image {
+  .movie img {
     width: 100%;
-    height: 180px;
+    height: auto;
     border-radius: 8px;
-    object-fit: cover;
     margin-bottom: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  }
+  .movie .no-image {
+    width: 100%;
+    height: 200px;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: #eee;
+    color: #888;
     font-size: 0.9em;
-    color: #666;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    text-align: center;
   }
-
-  .movie .no-image span {
-    font-size: 2em;
-    margin-bottom: 4px;
-  }
-
   .movie a {
     font-weight: bold;
     color: #333;
     text-decoration: none;
+    text-align: center;
     margin-bottom: 6px;
     display: block;
+    word-break: break-word;
   }
-
   .movie .status-label {
-    font-size: 0.9em;
+    font-size: 0.85em;
     color: #555;
     margin-bottom: 6px;
+    text-align: center;
   }
-
   .movie button {
     cursor: pointer;
     background:#1e90ff;
@@ -191,7 +188,7 @@
 </style>
 </head>
 <body>
-<h1><span style="-webkit-text-fill-color: initial;">🎬</span>ムビチョコ<span style="-webkit-text-fill-color: initial;">🍫</span></h1>
+<h1>🎬ムビチョコ🍫</h1>
 
 <div class="tabs">
   <div class="tab active" data-tab="want">観たいリスト</div>
@@ -203,7 +200,6 @@
 <div id="want" class="tabContent active">
   <br>
   <h2>🍿観たいリスト</h2>
-
   <div class="random-box">
     <h3>🎲 ランダムピックアップ</h3>
     <label>ステータス:
@@ -214,16 +210,14 @@
       </select>
     </label>
     <label>ジャンル:
-      <select id="filterGenre">
-        <option value="">全部</option>
-      </select>
+      <select id="filterGenre"><option value="">全部</option></select>
     </label>
     <br>
     <button id="btnRandom">ランダムで選ぶ</button>
     <div id="randomResult" style="margin-top:12px;"></div>
   </div>
 
-  <div id="wantList">読み込み中...</div>
+  <div id="wantList" class="cards-container">読み込み中...</div>
 </div>
 
 <div id="watched" class="tabContent">
@@ -270,7 +264,6 @@ async function loadWant(){
   if(!API){ document.getElementById('wantList').innerText="API未設定"; return; }
   const data = await getJSON(API+'?action=list');
   if(!data){ document.getElementById('wantList').innerText="読み込み失敗"; return; }
-
   allMovies = data;
 
   const genreSelect = document.getElementById('filterGenre');
@@ -304,12 +297,16 @@ async function loadWant(){
       const d=document.createElement('div');
       d.className='movie';
       d.innerHTML=`
-        ${m.poster ? `<img src="${m.poster}" alt="${m.title}" onerror="this.style.display='none'">` 
-                   : `<div class="no-image"><span>🎞️</span>Not image</div>`}
+        ${m.poster ? `<img src="${m.poster}" alt="${m.title}" onerror="this.style.display='none'"><div class="no-image" style="display:none">No image</div>` 
+                    : `<div class="no-image">No image</div>`}
         <a href="${m.url||'#'}" target="_blank">${m.title}</a>
         <div class="status-label">${m.status||''}</div>
         <button>観た！</button>
       `;
+      const img = d.querySelector('img');
+      const noImg = d.querySelector('.no-image');
+      if(img) img.onerror = ()=>{ img.style.display='none'; noImg.style.display='flex'; };
+
       d.querySelector('button').onclick=async()=>{
         await getJSON(API+`?action=watched&title=${encodeURIComponent(m.title)}`);
         loadWant(); loadWatched();
@@ -337,7 +334,6 @@ async function loadWatched(){
   });
 }
 
-// ランダムピックアップ
 document.getElementById('btnRandom').onclick = () => {
   if(!allMovies.length){ document.getElementById('randomResult').innerText="リストが空です"; return; }
 
@@ -354,7 +350,6 @@ document.getElementById('btnRandom').onclick = () => {
   document.getElementById('randomResult').innerHTML = `👉 <a href="${choice.url||'#'}" target="_blank">${choice.title}</a> [${choice.status||''}]`;
 };
 
-// 追加フォーム
 document.getElementById('addForm').onsubmit=async(e)=>{
   e.preventDefault();
   if(!API){ setStatus("API未設定"); return; }
@@ -368,7 +363,6 @@ document.getElementById('addForm').onsubmit=async(e)=>{
   loadWant();
 };
 
-// 設定
 document.getElementById('saveApi').onclick=()=>{
   const val=document.getElementById('apiUrlInput').value.trim();
   if(val){
@@ -379,7 +373,6 @@ document.getElementById('saveApi').onclick=()=>{
   }
 };
 
-// タブ切替
 document.querySelectorAll('.tab').forEach(tab=>{
   tab.addEventListener('click',()=>{
     document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
@@ -390,7 +383,6 @@ document.querySelectorAll('.tab').forEach(tab=>{
   });
 });
 
-// 初期ロード
 document.getElementById('apiUrlInput').value=API;
 if(API){ loadWant(); loadWatched(); }
 </script>

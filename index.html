@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ムビチョコ</title>
+<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Kosugi+Maru&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: 'Kosugi Maru', sans-serif;
+    margin: 18px;
+    max-width: 900px;
+    background: #ffffff;
+    color: #333;
+  }
+  h1 {
+    background: linear-gradient(90deg, #4da0ff, #1e90ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 2em;
+    margin-bottom: 18px;
+  }
+  .tabs {
+    display: flex;
+    border-bottom: 2px solid #ccc;
+    margin-bottom: 12px;
+  }
+  .tab {
+    padding: 10px 16px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    border-bottom: none;
+    background: #f0f8ff;
+    margin-right: 4px;
+    border-radius: 6px 6px 0 0;
+    transition: 0.3s;
+  }
+  .tab.active {
+    background: #ffffff;
+    font-weight: bold;
+    color: #1e90ff;
+  }
+  .tab:hover { background: #e6f0ff; }
+  .tabContent { display: none; }
+  .tabContent.active { display: block; }
+  h2 { margin-top: 0; }
+  .status { margin: 8px 0; font-weight: bold; }
+  .genre-block {
+    margin-bottom: 18px;
+    padding: 8px;
+    border-radius: 6px;
+  }
+  /* 観たいリスト */
+  .movie {
+    padding:6px;
+    border-bottom:1px solid #ddd;
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    border-radius: 4px;
+    margin-bottom: 4px;
+  }
+  .movie a {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    flex:1; /* タイトルが伸びてもOK */
+  }
+  .movie .status-label {
+    width: 60px;      /* 固定幅 */
+    text-align: right; 
+    font-size: 0.9em;
+    color: #555;
+    margin-left: 12px;
+    flex-shrink:0;    /* 縮まない */
+  }
+  .movie button {
+    cursor: pointer;
+    background:#fff;
+    border:1px solid #1e90ff;
+    border-radius:4px;
+    padding:2px 6px;
+    transition: all 0.2s ease;
+    margin-left: 8px;
+  }
+  .movie button:hover {
+    background: #1e90ff;
+    color: #fff;
+    border-color:#1e90ff;
+  }
+
+  /* ランダムピックアップ */
+  .random-box {
+    background: linear-gradient(135deg, #d6f0ff, #e0f5ff);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 36px 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .random-box h3 {
+    font-size: 1.4em;
+    color: #1e90ff;
+    margin-top: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  #btnRandom {
+    background: white;
+    border: 2px solid #1e90ff;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top:8px;
+  }
+  #btnRandom:hover {
+    background: linear-gradient(90deg, #4da0ff, #1e90ff);
+    color: white;
+    transform: scale(1.05);
+  }
+
+  /* 観たリスト */
+  .watched-movie {
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 6px;
+    border-radius: 6px;
+    background: #f9fbff;
+  }
+  .watched-movie span.date {
+    font-size: 0.85em;
+    color: #666;
+    margin-right: 8px;
+  }
+  .watched-movie a {
+    font-weight: bold;
+    color: #333;
+    text-decoration: none;
+  }
+
+  /* 追加フォーム */
+  #addForm {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  #addForm label {
+    font-weight: bold;
+  }
+  #addForm input {
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #e6f2ff;
+  }
+  #addForm button {
+    margin-top: 12px;
+    padding: 8px;
+    border: none;
+    background: #1e90ff;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  #addForm button:hover {
+    background: #187bcd;
+  }
+</style>
+</head>
+<body>
+<h1><span style="-webkit-text-fill-color: initial;">🎬</span>ムビチョコ<span style="-webkit-text-fill-color: initial;">🍫</span></h1>
+
+<div class="tabs">
+  <div class="tab active" data-tab="want">観たいリスト</div>
+  <div class="tab" data-tab="watched">観たリスト</div>
+  <div class="tab" data-tab="add">追加</div>
+  <div class="tab" data-tab="settings">設定</div>
+</div>
+
+<div id="want" class="tabContent active">
+  <br>
+  <h2>🍿観たいリスト</h2>
+
+  <div class="random-box">
+    <h3>🎲 ランダムピックアップ</h3>
+    <label>ステータス:
+      <select id="filterStatus">
+        <option value="">全部</option>
+        <option value="無料">無料</option>
+        <option value="有料">有料</option>
+      </select>
+    </label>
+    <label>ジャンル:
+      <select id="filterGenre">
+        <option value="">全部</option>
+      </select>
+    </label>
+    <br>
+    <button id="btnRandom">ランダムで選ぶ</button>
+    <div id="randomResult" style="margin-top:12px;"></div>
+  </div>
+
+  <div id="wantList">読み込み中...</div>
+</div>
+
+<div id="watched" class="tabContent">
+  <br>
+  <h2>✅観たリスト</h2>
+  <div id="watchedList">読み込み中...</div>
+</div>
+
+<div id="add" class="tabContent">
+  <br>
+  <h2>➕追加</h2>
+  <form id="addForm">
+    <label>タイトル</label>
+    <input type="text" id="title" required />
+    <label>URL</label>
+    <input type="text" id="url" />
+    <label>ステータス</label>
+    <input type="text" id="status" placeholder="有料/無料など" />
+    <label>ジャンル</label>
+    <input type="text" id="genre" />
+    <button type="submit">追加</button>
+  </form>
+  <div id="addMsg" class="status"></div>
+</div>
+
+<div id="settings" class="tabContent">
+  <br>
+  <h2>⚙設定</h2>
+  <label>API URL: <input type="text" id="apiUrlInput" style="width:80%" /></label>
+  <button id="saveApi">保存</button>
+  <div id="saveMsg" class="status"></div>
+</div>
+
+<script>
+let API = localStorage.getItem('mubichoco_api') || '';
+let allMovies = [];
+
+function setStatus(msg){ document.getElementById('addMsg').innerText = msg; }
+async function getJSON(url){
+  try { return await (await fetch(url)).json(); } catch(e){ console.error(e); return null; }
+}
+
+async function loadWant(){
+  if(!API){ document.getElementById('wantList').innerText="API未設定"; return; }
+  const data = await getJSON(API+'?action=list');
+  if(!data){ document.getElementById('wantList').innerText="読み込み失敗"; return; }
+
+  allMovies = data;
+
+  const genreSelect = document.getElementById('filterGenre');
+  const genres = Array.from(new Set(data.map(m=>m.genre||"未分類")));
+  genreSelect.innerHTML = '<option value="">全部</option>';
+  genres.forEach(g=>{ genreSelect.innerHTML += `<option value="${g}">${g}</option>`; });
+
+  const grouped = {};
+  data.forEach(m => {
+    const g = m.genre || "未分類";
+    if(!grouped[g]) grouped[g]=[];
+    grouped[g].push(m);
+  });
+
+  const container=document.getElementById('wantList');
+  container.innerHTML='';
+  const colors=["#d6f0ff","#d6f5ff","#d6ffd8","#fff3d6","#e0f5ff","#e0f0ff"];
+  let colorIndex=0;
+
+  Object.keys(grouped).forEach(g=>{
+    const block=document.createElement('div');
+    block.className='genre-block';
+    block.style.background=colors[colorIndex%colors.length];
+    colorIndex++;
+    block.innerHTML=`<h3>${g}</h3>`;
+    grouped[g].forEach(m=>{
+      const d=document.createElement('div');
+      d.className='movie';
+      d.innerHTML=`<a href="${m.url||'#'}" target="_blank">${m.title}</a>
+                   <div class="status-label">${m.status||''}</div>
+                   <button>観た！</button>`;
+      d.querySelector('button').onclick=async()=>{
+        await getJSON(API+`?action=watched&title=${encodeURIComponent(m.title)}`);
+        loadWant(); loadWatched();
+      };
+      block.appendChild(d);
+    });
+    container.appendChild(block);
+  });
+}
+
+async function loadWatched(){
+  if(!API){ document.getElementById('watchedList').innerText="API未設定"; return; }
+  const data=await getJSON(API+'?action=watchedList');
+  if(!data){ document.getElementById('watchedList').innerText="読み込み失敗"; return; }
+
+  const container=document.getElementById('watchedList');
+  container.innerHTML='';
+  data.forEach(m=>{
+    const d=document.createElement('div');
+    d.className='watched-movie';
+    d.innerHTML=`<span class="date">${m.watchedDate||''}</span><a href="${m.url||'#'}" target="_blank">${m.title}</a>`;
+    container.appendChild(d);
+  });
+}
+
+// ランダムピックアップ
+document.getElementById('btnRandom').onclick = () => {
+  if(!allMovies.length){ document.getElementById('randomResult').innerText="リストが空です"; return; }
+
+  const statusFilter = document.getElementById('filterStatus').value;
+  const genreFilter = document.getElementById('filterGenre').value;
+
+  let filtered = allMovies;
+  if(statusFilter) filtered = filtered.filter(m => m.status === statusFilter);
+  if(genreFilter) filtered = filtered.filter(m => m.genre === genreFilter);
+
+  if(!filtered.length){ document.getElementById('randomResult').innerText="条件に合う映画がありません"; return; }
+
+  const choice = filtered[Math.floor(Math.random()*filtered.length)];
+  document.getElementById('randomResult').innerHTML = `👉 <a href="${choice.url||'#'}" target="_blank">${choice.title}</a> [${choice.status||''}]`;
+};
+
+// 追加フォーム
+document.getElementById('addForm').onsubmit=async(e)=>{
+  e.preventDefault();
+  if(!API){ setStatus("API未設定"); return; }
+  const title=document.getElementById('title').value;
+  const url=document.getElementById('url').value;
+  const status=document.getElementById('status').value;
+  const genre=document.getElementById('genre').value;
+  await getJSON(API+`?action=add&title=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}&status=${encodeURIComponent(status)}&genre=${encodeURIComponent(genre)}`);
+  setStatus("✅ 追加されました！");
+  document.getElementById('addForm').reset();
+  loadWant();
+};
+
+// 設定
+document.getElementById('saveApi').onclick=()=>{
+  const val=document.getElementById('apiUrlInput').value.trim();
+  if(val){
+    localStorage.setItem('mubichoco_api',val);
+    API=val;
+    document.getElementById('saveMsg').innerText="✅ 保存しました";
+    loadWant(); loadWatched();
+  }
+};
+
+// タブ切替
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    const target=tab.dataset.tab;
+    document.querySelectorAll('.tabContent').forEach(c=>c.classList.remove('active'));
+    document.getElementById(target).classList.add('active');
+  });
+});
+
+// 初期ロード
+document.getElementById('apiUrlInput').value=API;
+if(API){ loadWant(); loadWatched(); }
+</script>
+</body>
+</html>

@@ -53,20 +53,19 @@
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-    padding: 10px;
-    width: 130px;
+    padding: 12px;
+    width: 140px;
   }
   .movie img {
-    width: 100%;
+    width: 130px;
     height: auto;
-    aspect-ratio: 2 / 3;
     border-radius: 8px;
     margin-bottom: 8px;
     object-fit: cover;
   }
   .movie .no-image {
-    width: 100%;
-    aspect-ratio: 2 / 3;
+    width: 130px;
+    height: 195px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -160,6 +159,13 @@
     cursor: pointer;
   }
   #addForm button:hover { background: #187bcd; }
+
+  /* ジャンルブロック */
+  .genre-block {
+    margin-bottom: 24px;
+    padding: 12px;
+    border-radius: 12px;
+  }
 </style>
 </head>
 <body>
@@ -192,7 +198,7 @@
     <div id="randomResult" style="margin-top:12px;"></div>
   </div>
 
-  <div id="wantList" class="cards-container">読み込み中...</div>
+  <div id="wantList">読み込み中...</div>
 </div>
 
 <div id="watched" class="tabContent">
@@ -230,10 +236,9 @@
 let API = localStorage.getItem('mubichoco_api') || '';
 let allMovies = [];
 
+// ステータス表示
 function setStatus(msg){ document.getElementById('addMsg').innerText = msg; }
-async function getJSON(url){
-  try { return await (await fetch(url)).json(); } catch(e){ console.error(e); return null; }
-}
+async function getJSON(url){ try { return await (await fetch(url)).json(); } catch(e){ console.error(e); return null; } }
 
 // 観たいリスト
 async function loadWant(){
@@ -304,10 +309,10 @@ async function loadWatched(){
   const container = document.getElementById('watchedList');
   container.innerHTML = '';
 
-  data.forEach(m=>{
-    const d=document.createElement('div');
-    d.className='movie';
-    d.innerHTML=`
+  data.forEach(m => {
+    const d = document.createElement('div');
+    d.className = 'movie';
+    d.innerHTML = `
       ${m.poster ? `<img src="${m.poster}" alt="${m.title}" onerror="this.style.display='none'"><div class="no-image" style="display:none">No image</div>` 
                   : `<div class="no-image">No image</div>`}
       <a href="${m.url||'#'}" target="_blank">${m.title}</a>
